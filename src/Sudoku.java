@@ -9,98 +9,96 @@ public class Sudoku {
         puzzle = new int[9][9];
     }
 
-    public void puzzleMaker(){
-       numberFiller(1);
-       numberFiller(2);
-       numberFiller(3);
-       //numberFiller(4);
-       //numberFiller(5);
-       //numberFiller(6);
-       //numberFiller(7);
-       //numberFiller(8);
-       //numberFiller(9);
-       printPuzzle();
-    }
-
-    public void numberFiller(int digit){
-        // 1) in each grid, check rows for any openings, add to list if have them and row already doesn't have number
-        // 2) randomly pick a row from the list
-        // 3) when have row, check for potential columns, add those that have an opening and dont have number already
-        // 4) randomly pick column from the list
-        // 5) add digit to the spot
-    
-
+    public void puzzleMaker() {
+        if (fillGrid(0, 0) == true) {
+            printPuzzle();
+        }
     }
 
 
-    public List<Integer> rowUsed(int row){
-        List<Integer> rowUsed = new ArrayList<>();
-        
-        for(int col = 0; col <= 8; col++){
-            rowUsed.add(puzzle[row][col]);
+    public boolean fillGrid(int row, int col) {
+        if (row == 9) {
+            return true; // Grid is filled
         }
 
-        return rowUsed;
-    }
-
-
-    public List<Integer> colUsed(int col){
-        List<Integer> colUsed = new ArrayList<>();
-        
-        for(int row = 0; row <= 8; row++){
-            colUsed.add(puzzle[row][col]);
+        if (col == 9) {
+            return fillGrid(row + 1, 0); // Move to the next row
         }
 
-        return colUsed;
-    }
+        List<Integer> digits = generateRandomDigits();
 
-    public List<Integer> possColumns(int row, int colLeft){
-        List<Integer> clearCols = new ArrayList<>();
-
-        for(int col = colLeft; col <= colLeft+2; col++){
-            int digitAtSpot = puzzle[row][col];
-            if(digitAtSpot == 0){
-                clearCols.add(col);
+        for (int digit : digits) {
+            if (canPlaceDigit(row, col, digit) == true) {
+                puzzle[row][col] = digit;
+                if (fillGrid(row, col + 1) == true) {
+                    return true;
+                }
+                puzzle[row][col] = 0; // Backtrack
             }
         }
 
-        return clearCols;
+        return false; // Trigger backtracking
     }
 
+    public List<Integer> generateRandomDigits() {
+        List<Integer> digits = new ArrayList<>();
+        for (int i = 1; i <= 9; i++) {
+            digits.add(i);
+        }
+        Collections.shuffle(digits);
+        return digits;
+    }
 
-    public List<Integer> possRows(int rowTop, int colLeft){
-        List<Integer> clearRows = new ArrayList<>();
+    public boolean canPlaceDigit(int row, int col, int digit) {
+        // Check row
+        for (int i = 0; i < 9; i++) {
+            if (puzzle[row][i] == digit) {
+                return false;
+            }
+        }
 
-        for(int row = rowTop; row <= rowTop+2; row++){
-            for(int col = colLeft; col <= colLeft+2; col++){
-                int digit = puzzle[row][col];
-                if(digit == 0){
-                    clearRows.add(row);
-                    break;
+        // Check column
+        for (int i = 0; i < 9; i++) {
+            if (puzzle[i][col] == digit) {
+                return false;
+            }
+        }
+
+        // Check 3x3 grid
+        int rowStart = (row / 3) * 3;
+        int colStart = (col / 3) * 3;
+        for (int i = rowStart; i < rowStart + 3; i++) {
+            for (int j = colStart; j < colStart + 3; j++) {
+                if (puzzle[i][j] == digit) {
+                    return false;
                 }
             }
         }
 
-        return clearRows;
+        return true;
     }
 
-
-    public void printPuzzle(){
-        for(int row = 0; row <= 8; row++){
-            if(row % 3 == 0){
+    public void printPuzzle() {
+        for (int row = 0; row <= 8; row++) {
+            if (row % 3 == 0) {
                 System.out.println();
             }
-            for(int col = 0; col <= 8; col++){
-                if(col % 3 == 0){
+            for (int col = 0; col <= 8; col++) {
+                if (col % 3 == 0) {
                     System.out.print(" ");
                 }
-                System.out.print(puzzle[row][col]);
+                System.out.print(puzzle[row][col] + " ");
             }
             System.out.println();
         }
     }
 
+    public static void main(String[] args) {
+        Sudoku sudoku = new Sudoku("medium");
+        sudoku.puzzleMaker();
+    }
 }
+
 
 
     
